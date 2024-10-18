@@ -1,20 +1,22 @@
-# DiamondNFT: Faceted Presale and Merkle Distribution
+# DiamondNFT: ERC721, Merkle Distribution, and Presale
 
 ## Overview
 
-DiamondNFT is an advanced Ethereum-based NFT project that leverages the Diamond pattern to create a flexible and upgradeable smart contract system. It combines ERC721 functionality with a presale mechanism and Merkle tree-based token distribution.
+DiamondNFT is an Ethereum-based NFT system utilizing the Diamond pattern for modular and upgradeable smart contracts. The project features ERC721 NFT functionality, a Merkle tree-based distribution system, and a presale mechanism that enables users to purchase NFTs with predefined pricing and limits.
 
-## Features
+## Key Features
 
-- **Diamond Pattern**: Utilizes the Diamond pattern for modular and upgradeable smart contracts.
-- **ERC721 Compatibility**: Fully compliant with the ERC721 standard for non-fungible tokens.
-- **Presale Mechanism**: Allows for a presale period with customizable pricing and purchase limits.
-- **Merkle Distribution**: Implements a Merkle tree-based distribution system for efficient and gas-optimized token claiming.
-- **Foundry Integration**: Includes Foundry tests for robust contract verification and deployment.
+Diamond Pattern: A highly modular and upgradeable contract system.
 
-## Project Structure
+ERC721 Functionality: Full ERC721 NFT compliance via ERC721Facet.
 
-```
+Merkle Distribution: Gas-efficient claiming system using Merkle proofs in MerkleFacet.
+
+Presale Mechanism: Purchase NFTs in a presale period via PresaleFacet using the formula 1 ETH = 30 NFTs with a minimum purchase of 0.01 ETH.
+
+Project Structure
+bash
+Copy code
 DiamondNFT/
 ├── src/
 │   ├── Diamond.sol
@@ -32,109 +34,129 @@ DiamondNFT/
 │   └── whitelistAddresses.json
 ├── foundry.toml
 └── README.md
-```
 
 ## Prerequisites
 
-- [Foundry](https://book.getfoundry.sh/getting-started/installation.html)
-- [Node.js](https://nodejs.org/) (for Merkle tree generation)
-- [Yarn](https://yarnpkg.com/) or [npm](https://www.npmjs.com/)
+Foundry for smart contract compilation, testing, and deployment.
 
-## Setup
+Node.js for Merkle tree generation.
 
-1. Clone the repository:
+Yarn or npm for package management.
 
-   ```
-   git clone hhttps://github.com/Superior212/DiamondNFT.git
-   cd DiamondNFT
-   ```
+## Setup Instructions
 
-2. Install Foundry dependencies:
+1. Clone the Repository
+bash
+Copy code
+git clone https://github.com/Micjohn01/DiamondStandardNFT.git
+cd DiamondStandardNFT
 
-   ```
-   forge install
-   ```
+2. Install Dependencies
+Foundry Dependencies
+bash
+Copy code
+forge install
+Node.js Dependencies
+bash
+Copy code
+yarn install
+# or
+npm install
 
-3. Install Node.js dependencies:
+3. Generate the Merkle Tree
+Generate the Merkle tree for the whitelist of addresses:
 
-   ```
-   yarn install
-   ```
+bash
+Copy code
+ts-node merkle/generateMerkleTree.ts
+This will produce a Merkle root and proof that will be used for claiming NFTs in the MerkleFacet.
 
-   or
-
-   ```
-   npm install
-   ```
-
-4. Generate the Merkle tree:
-   ```
-   ts-node merkle/generateMerkleTree.ts
-   ```
-
-## Compilation
-
+Compilation
 Compile the smart contracts using Foundry:
 
-```
+bash
+Copy code
 forge build
-```
+Testing
+Run the Foundry tests to verify the functionality of the DiamondNFT system:
 
-## Testing
-
-Run the Foundry tests:
-
-```
+bash
+Copy code
 forge test
-```
+The test suite covers the deployment of the diamond contract, presale purchases, and Merkle proof-based claims.
 
 ## Deployment
+1. Set Environment Variables
+Copy the example environment file and add your private key and RPC URL:
 
-1. Set up your environment variables:
+bash
+Copy code
+cp .env.example .env
+Edit the .env file with your deployment configuration:
 
-   ```
-   cp .env.example .env
-   ```
+PRIVATE_KEY: Your Ethereum private key.
+RPC_URL: The RPC URL of the network you are deploying to.
+2. Deploy the DiamondNFT Contracts
+Run the deployment script with Foundry:
 
-   Edit `.env` and add your private key and RPC URL.
-
-2. Run the deployment script:
-   ```
-   forge script script/DeployDiamondNFT.s.sol:DeployDiamondNFT --rpc-url $RPC_URL --broadcast --verify -vvvv
-   ```
+bash
+Copy code
+forge script script/DeployDiamondNFT.s.sol:DeployDiamondNFT --rpc-url $RPC_URL --broadcast --verify -vvvv
+This script deploys the DiamondNFT contract, including the ERC721Facet, MerkleFacet, and PresaleFacet.
 
 ## Usage
 
-### Presale
+1. Presale Participation
+Users can participate in the presale by sending ETH to the buyPresale() function in the PresaleFacet. The presale price is set as 1 ETH = 30 NFTs, with a minimum purchase of 0.01 ETH.
 
-Users can participate in the presale by calling the `buyPresale` function in the PresaleFacet. The presale price is set to 1 ETH for 30 NFTs, with a minimum purchase of 0.01 ETH.
+Example:
 
-### Merkle Distribution
+solidity
+Copy code
+PresaleFacet.buyPresale{value: 0.1 ether}();
+This will purchase 3 NFTs for the user.
 
-Whitelisted users can claim their NFTs by providing a valid Merkle proof to the `claim` function in the MerkleFacet.
+2. Claiming NFTs with Merkle Proof
+Whitelisted users can claim their NFTs by providing a valid Merkle proof via the claim() function in the MerkleFacet.
 
-### ERC721 Functionality
+To set the Merkle root:
 
-Standard ERC721 functions are available through the ERC721Facet, allowing for token transfers, approvals, and balance checks.
+solidity
+Copy code
+MerkleFacet.setMerkleRoot(_merkleRoot);
+Users must provide their Merkle proof (generated from the TypeScript script) to claim their NFTs:
 
-## Upgradeability
+solidity
+Copy code
+MerkleFacet.claim(_merkleProof);
+3. ERC721 Standard Functions
+All standard ERC721 functions are available through the ERC721Facet, including:
 
-The Diamond pattern allows for easy upgradeability. New facets can be added or existing ones can be replaced by updating the Diamond contract.
+transferFrom()
+approve()
+balanceOf()
+ownerOf()
+Upgradeability
+The Diamond pattern allows easy upgradeability of the system by adding, replacing, or removing facets. This enables the contract to evolve without needing to be redeployed, keeping user data and token states intact.
+
+To add or replace a facet, use the diamond’s upgrade functionality by providing the new facet contract address.
 
 ## Security Considerations
+Access Control: Ensure only authorized addresses can set the Merkle root and modify presale parameters.
+Presale Limits: The presale is capped by a limit to avoid overselling.
+Merkle Distribution: Carefully manage the whitelist and ensure the Merkle root is accurate before enabling claims.
+Multisig: Consider using a multisig wallet for admin operations to improve security.
+Contributing
+We welcome contributions to this project! If you’d like to contribute:
 
-- Ensure that only authorized addresses can set the Merkle root and presale parameters.
-- Carefully manage the whitelist for Merkle distribution.
-- Consider implementing a multisig wallet for critical contract operations.
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and create a pull request with your proposed changes.
+## Fork the repository.
+Create a new branch (git checkout -b feature-branch).
+Commit your changes (git commit -m 'Add new feature').
+Push to the branch (git push origin feature-branch).
+Create a pull request.
 
 ## License
-
 This project is licensed under the MIT License.
 
 ## Disclaimer
-
-This project is provided as-is and should be thoroughly audited before any production use. The authors are not responsible for any losses incurred through the use of this software.
+This project is provided "as-is" and should be thoroughly audited before any production use. The authors take no responsibility for any potential losses or issues that may arise.
